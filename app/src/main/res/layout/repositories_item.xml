@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="48dp"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_repository"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp" />
+
+    <TextView
+        android:id="@+id/repositoriesItemName"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/primary_text_dark"
+        android:textSize="16sp"
+        android:singleLine="true"
+        android:fadingEdge="horizontal"
+        android:fadingEdgeLength="10dp"
+        android:layout_gravity="center"
+
+        android:shadowColor="#CCCCCC"
+        android:shadowDx="1.0"
+        android:shadowDy="1.0"
+        android:shadowRadius="1.0" />
+
+</LinearLayout>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/general_settings">
+
+        <CheckBoxPreference
+            android:key="statusbar_notification"
+            android:title="StatusBar notification"
+            android:summaryOn="@string/click_to_disable"
+            android:summaryOff="@string/click_to_enable"
+            android:defaultValue="true" />
+
+        <!--         <EditTextPreference  -->
+        <!--             android:key="git_repositories_dir" -->
+        <!--             android:title="@string/settings_git_repositories_directory" -->
+        <!--             android:defaultValue="/sdcard/gitrepo/repositories"/> -->
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/server_settings">
+
+        <EditTextPreference
+            android:key="ssh_port"
+            android:title="@string/settings_ssh_server_port"
+            android:defaultValue="2222" />
+
+        <!-- 		<CheckBoxPreference  -->
+        <!-- 		    android:key="ssh_service_startup" -->
+        <!-- 		    android:title="@string/settings_start_on_boot" -->
+        <!-- 		    android:summaryOn="@string/click_to_disable" -->
+        <!-- 		    android:summaryOff="@string/click_to_enable" -->
+        <!-- 		    android:defaultValue="false"/> -->
+
+        <CheckBoxPreference
+            android:key="autostart_on_wifi_on"
+            android:title="Autostart"
+            android:summaryOn="Autostart on WiFi ON"
+            android:summaryOff="Autostart on WiFi ON"
+            android:defaultValue="false" />
+
+        <CheckBoxPreference
+            android:key="autostop_on_wifi_off"
+            android:title="Autostop"
+            android:summaryOn="Autostop on WiFi OFF"
+            android:summaryOff="Autostop on WiFi OFF"
+            android:defaultValue="false" />
+
+        <CheckBoxPreference
+            android:key="ssh_shell"
+            android:title="SSH Shell"
+            android:summaryOn="SSH Shell enabled. Use -T option on ssh client"
+            android:summaryOff="SSH Shell disabled"
+            android:defaultValue="false" />
+
+        <CheckBoxPreference
+            android:key="scp"
+            android:title="SCP"
+            android:summaryOn="SCP enabled. Only /sdcard is writable"
+            android:summaryOff="SCP disabled"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/repo_backup">
+        <CheckBoxPreference
+            android:id="@+id/repo_backup"
+            android:key="repo_backup"
+            android:title="@string/repo_backup"
+            android:summaryOn="Repositories are backed up using Android Backup. Disable and enable again to change password."
+            android:summaryOff="Repositories are not backed up"
+            android:defaultValue="false"
+             />
+
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/email_log">
+
+        <Preference
+            android:key="@string/email_log"
+            android:title="@string/email_log"
+            android:summary="Email debug information to developer" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

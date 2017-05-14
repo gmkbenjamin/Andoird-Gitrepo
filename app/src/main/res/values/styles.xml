@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="general_list_style">
+        <item name="android:background">@drawable/bg_content_box</item>
+        <item name="android:cacheColorHint">#00000000</item>
+        <!--         <item name="android:divider">#D4D4D4</item> -->
+        <item name="android:dividerHeight">1dp</item>
+        <item name="android:footerDividersEnabled">false</item>
+        <item name="android:headerDividersEnabled">false</item>
+        <item name="android:layout_margin">5dp</item>
+        <!--         <item name="android:padding">5dp</item> -->
+    </style>
+
+    <style name="black_shadowed_font">
+        <item name="android:textColor">#000000</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:shadowColor">@android:color/black</item>
+        <item name="android:shadowDx">1.0</item>
+        <item name="android:shadowDy">1.0</item>
+        <item name="android:shadowRadius">1.0</item>
+    </style>
+
+    <style name="blue_background_white_shadowed_font" parent="black_shadowed_font">
+        <item name="android:background">@drawable/blue_btn_selector</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textStyle">bold</item>
+        <!-- 		<item name="android:textStyle">bold</item> -->
+        <!-- 		<item name="android:textSize">20sp</item> -->
+        <!-- 		<item name="android:shadowColor">@android:color/black</item> -->
+        <!-- 		<item name="android:shadowDx">1.0</item> -->
+        <!-- 		<item name="android:shadowDy">1.0</item> -->
+        <!-- 		<item name="android:shadowRadius">1.0</item> -->
+    </style>
+</resources>
