@@ -56,6 +56,14 @@ public class HomeActivity extends BaseActivity {
     private TextView homeServerInfoTextView;
     private SharedPreferences prefs;
 
+    private void stopAll(View v){
+        boolean isSshServiceRunning = GitrepoCommons.isSshServiceRunning(HomeActivity.this);
+
+        Intent intent = new Intent(v.getContext(), SSHDaemonService.class);
+        if (isSshServiceRunning) {
+            stopService(intent);
+        }
+    }
     private BroadcastReceiver connectivityChangeBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
@@ -353,6 +361,7 @@ public class HomeActivity extends BaseActivity {
             wifiSSIDTextView.setText("");
             wirelessImageView.setImageResource(R.drawable.ic_wireless_disabled);
             startStopButton.setBackgroundResource(R.drawable.white_btn_selector);
+            stopAll(this.homeServerInfoTextView);
         }
     }
 
