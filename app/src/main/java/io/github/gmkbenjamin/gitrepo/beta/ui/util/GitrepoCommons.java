@@ -21,7 +21,11 @@ import android.view.WindowManager;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Hex;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Collections;
@@ -161,26 +165,32 @@ public abstract class GitrepoCommons {
         if (ipAddress != 0) {
             return formatIpAddress(ipAddress);
         } else {
+
             //Is it on hotspot mode?
             try {
+                Method method = myWifiManager.getClass().getDeclaredMethod("getWifiApState");
+                method.setAccessible(true);
+                int actualState = (Integer) method.invoke(myWifiManager, (Object[]) null);
+                if (actualState == 13)
+                    hotspot = true;
+                else
+                    hotspot = false;
                 List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
                 for (NetworkInterface intf : interfaces) {
                     if (intf.getName().contains("wlan") || intf.getDisplayName().contains("wlan")) {
                         if (intf.isUp() && intf.getInterfaceAddresses().size() > 0) {
-                            hotspot = true;
+                            for (InterfaceAddress addr : intf.getInterfaceAddresses()) {
+                                if (addr.getAddress() instanceof Inet4Address)
+                                    return addr.getAddress().toString().replace("/", "");
+                            }
                             return intf.getInterfaceAddresses().get(0).getAddress().toString().replace("/", "");
                         }
-
-                    }
-                    if (intf.isUp() && intf.getInterfaceAddresses().size() > 0 &&
-                            intf.getInterfaceAddresses().get(0).getAddress().toString().contains("192.168.43.1")) {
-                        hotspot = true;
-                        return intf.getInterfaceAddresses().get(0).getAddress().toString().replace("/", "");
                     }
                 }
-            } catch (SocketException e) {
+            } catch (SocketException|NoSuchMethodException|IllegalAccessException|InvocationTargetException e) {
                 e.printStackTrace();
             }
+
             return null;
         }
     }
