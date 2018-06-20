@@ -5,8 +5,11 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -17,9 +20,7 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+
 
 import java.sql.SQLException;
 import java.util.List;
@@ -128,7 +129,8 @@ public class RepositoriesFragment extends BaseFragment implements OnItemLongClic
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        actionMode = getSherlockActivity().startActionMode(new UserListActionMode(position));
+        actionMode = getActivity().startActionMode(new UserListActionMode(position));
+
 
         return true;
     }
@@ -147,13 +149,15 @@ public class RepositoriesFragment extends BaseFragment implements OnItemLongClic
     public void onDismiss() {
     }
 
-    private final class UserListActionMode implements ActionMode.Callback {
+    private final class UserListActionMode implements ActionMode.Callback, android.view.ActionMode.Callback {
 
         private final int position;
 
         public UserListActionMode(int position) {
             this.position = position;
         }
+
+
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
@@ -269,6 +273,26 @@ public class RepositoriesFragment extends BaseFragment implements OnItemLongClic
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
+        }
+
+        @Override
+        public boolean onCreateActionMode(android.view.ActionMode actionMode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(android.view.ActionMode actionMode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(android.view.ActionMode actionMode, MenuItem menuItem) {
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(android.view.ActionMode actionMode) {
+
         }
     }
 

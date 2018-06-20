@@ -3,8 +3,8 @@ package io.github.gmkbenjamin.gitrepo.beta.ui.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Window;
 
-import com.actionbarsherlock.view.Window;
 
 import io.github.gmkbenjamin.gitrepo.beta.R;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.C;

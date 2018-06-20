@@ -2,18 +2,19 @@ package io.github.gmkbenjamin.gitrepo.beta.ui.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.view.ActionMode;
 
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.view.ActionMode;
+
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
 
 import io.github.gmkbenjamin.gitrepo.beta.db.DBHelper;
 
-public abstract class BaseFragment extends SherlockFragment {
+public abstract class BaseFragment extends Fragment {
 
-    protected ActionMode actionMode;
+    protected android.view.ActionMode actionMode;
     private volatile DBHelper helper;
     private volatile boolean created = false;
     private volatile boolean destroyed = false;

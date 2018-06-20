@@ -8,7 +8,10 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -19,9 +22,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+
 
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -416,7 +417,7 @@ public class RepositoryDetailsActivity extends BaseActivity implements OnItemLon
         }
     }
 
-    private final class RepositoryPermissionActionMode implements ActionMode.Callback {
+    private final class RepositoryPermissionActionMode implements  ActionMode.Callback {
 
         private final int position;
 

@@ -12,17 +12,17 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
-import com.actionbarsherlock.view.MenuItem;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,7 +35,7 @@ import io.github.gmkbenjamin.gitrepo.beta.ui.util.C;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.Logger;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.PrefsConstants;
 
-public class GitrepoPreferencesActivity extends SherlockPreferenceActivity implements OnSharedPreferenceChangeListener {
+public class GitrepoPreferencesActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
     private String password = "";
     private EditTextPreference sshPortPreferences;
 
@@ -70,9 +70,8 @@ public class GitrepoPreferencesActivity extends SherlockPreferenceActivity imple
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.Theme_Sherlock);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTheme(R.style.Theme_AppCompat);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         super.onCreate(savedInstanceState);
 

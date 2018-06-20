@@ -2,7 +2,7 @@
 
 <resources>
     <!--     <style name="Theme.Styled" parent="Theme.Sherlock.Light.DarkActionBar.ForceOverflow"> -->
-    <style name="Theme.Styled" parent="Theme.Sherlock">
+    <style name="Theme.Styled" parent="Theme.AppCompat">
         <!-- 	<style name="Theme.Styled" parent="Theme.HoloEverywhereDark.Sherlock"> -->
         <!--         <item name="actionBarStyle">@style/Widget.Styled.ActionBar</item> -->
         <!--         <item name="android:actionBarStyle">@style/Widget.Styled.ActionBar</item> -->

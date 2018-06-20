@@ -5,14 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
 
 import io.github.gmkbenjamin.gitrepo.beta.db.DBHelper;
 
-public abstract class BaseActivity extends SherlockFragmentActivity implements OnClickListener {
+public abstract class BaseActivity extends ActionBarActivity implements OnClickListener {
 
     private volatile DBHelper helper;
     private volatile boolean created = false;

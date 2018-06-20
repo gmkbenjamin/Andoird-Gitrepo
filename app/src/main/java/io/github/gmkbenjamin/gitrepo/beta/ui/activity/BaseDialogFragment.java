@@ -3,15 +3,16 @@ package io.github.gmkbenjamin.gitrepo.beta.ui.activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 
-import com.actionbarsherlock.app.SherlockDialogFragment;
+
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
 
 import io.github.gmkbenjamin.gitrepo.beta.db.DBHelper;
 
-public abstract class BaseDialogFragment extends SherlockDialogFragment {
+public abstract class BaseDialogFragment extends DialogFragment {
 
     private volatile DBHelper helper;
     private volatile boolean created = false;
