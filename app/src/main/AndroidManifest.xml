@@ -57,22 +57,18 @@
         <activity
             android:name="io.github.gmkbenjamin.gitrepo.beta.ui.activity.GitrepoPreferencesActivity"
             android:label="Settings"
-            android:parentActivityName=".ui.activity.HomeActivity">
             android:exported="false">
             <intent-filter>
                 <action android:name="io.github.gmkbenjamin.gitrepo.beta.START_PREFERENCE_ACTIVITY" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.activity.HomeActivity" />
         </activity>
 
         <activity
             android:name="io.github.gmkbenjamin.gitrepo.beta.ui.activity.HomeActivity"
             android:uiOptions="splitActionBarWhenNarrow"
             android:exported="true"
-            android:launchMode="singleTop">
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="io.github.gmkbenjamin.gitrepo.beta.START_HOME_ACTIVITY" />
                 <category android:name="android.intent.category.DEFAULT" />

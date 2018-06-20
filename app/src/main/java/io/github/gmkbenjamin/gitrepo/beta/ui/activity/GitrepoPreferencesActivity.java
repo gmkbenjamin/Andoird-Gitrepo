@@ -14,6 +14,7 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBar;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -30,6 +31,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import android.support.v7.app.AppCompatDelegate;
+
 import io.github.gmkbenjamin.gitrepo.beta.R;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.C;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.Logger;
@@ -38,6 +41,7 @@ import io.github.gmkbenjamin.gitrepo.beta.ui.util.PrefsConstants;
 public class GitrepoPreferencesActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
     private String password = "";
     private EditTextPreference sshPortPreferences;
+    private AppCompatDelegate mDelegate;
 
     public void emailLog(String[] addresses, String subject, String body, Uri attachment) {
         try {
@@ -68,13 +72,18 @@ public class GitrepoPreferencesActivity extends PreferenceActivity implements On
 
     }
 
+    public ActionBar getSupportActionBar() {
+        return getDelegate().getSupportActionBar();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.Theme_AppCompat);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
 
+
+        getDelegate().onCreate(savedInstanceState);
         super.onCreate(savedInstanceState);
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         addPreferencesFromResource(R.xml.preferences);
 
         sshPortPreferences = (EditTextPreference) getPreferenceScreen().findPreference(PrefsConstants.SSH_PORT.getKey());
@@ -124,7 +133,7 @@ public class GitrepoPreferencesActivity extends PreferenceActivity implements On
                                 SharedPreferences.Editor editor = pref.edit();
                                 editor.putString("password", password);
                                 editor.commit();
-                                Toast.makeText(GitrepoPreferencesActivity.this,"Encryption password set.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(GitrepoPreferencesActivity.this, "Encryption password set.", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
@@ -224,6 +233,7 @@ public class GitrepoPreferencesActivity extends PreferenceActivity implements On
 
     @Override
     protected void onResume() {
+
         super.onResume();
 
         SharedPreferences prefs = getPreferenceScreen().getSharedPreferences();
@@ -235,6 +245,7 @@ public class GitrepoPreferencesActivity extends PreferenceActivity implements On
 
     @Override
     protected void onPause() {
+
         super.onPause();
 
         getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
@@ -248,4 +259,10 @@ public class GitrepoPreferencesActivity extends PreferenceActivity implements On
         }
     }
 
+    private AppCompatDelegate getDelegate() {
+        if (mDelegate == null) {
+            mDelegate = AppCompatDelegate.create(this, null);
+        }
+        return mDelegate;
+    }
 }

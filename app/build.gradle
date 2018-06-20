@@ -5,7 +5,7 @@ android {
     buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "io.github.gmkbenjamin.gitrepo.beta"
-        minSdkVersion 16
+        minSdkVersion 11
         targetSdkVersion 16
     }
     buildTypes {
@@ -33,7 +33,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:21.0.+'
+    implementation 'com.android.support:appcompat-v7:22.1.+'
     implementation 'com.android.support:support-v4:21.0.+'
     implementation 'com.j256.ormlite:ormlite-android:4.48'
     implementation 'org.apache.sshd:sshd-core:0.13.0'
