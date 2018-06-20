@@ -80,10 +80,11 @@ public class GitrepoPreferencesActivity extends PreferenceActivity implements On
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.Theme_AppCompat);
 
-
-        getDelegate().onCreate(savedInstanceState);
         super.onCreate(savedInstanceState);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        android.app.ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
         addPreferencesFromResource(R.xml.preferences);
 
         sshPortPreferences = (EditTextPreference) getPreferenceScreen().findPreference(PrefsConstants.SSH_PORT.getKey());
