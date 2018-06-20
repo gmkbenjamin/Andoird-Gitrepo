@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "io.github.gmkbenjamin.gitrepo.beta"
         minSdkVersion 9
@@ -33,12 +33,12 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:21.0.+'
-    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
-    compile 'com.j256.ormlite:ormlite-android:4.48'
-    compile 'org.apache.sshd:sshd-core:0.13.0'
-    compile 'org.apache.mina:mina-core:2.0.9'
-    compile 'org.eclipse.jgit:org.eclipse.jgit:3.6.0.201411121045-m1'
-    compile 'commons-validator:commons-validator:1.4.0'
-    compile 'org.bouncycastle:bcprov-jdk16:1.46'
+    implementation 'com.android.support:support-v4:21.0.+'
+    implementation 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
+    implementation 'com.j256.ormlite:ormlite-android:4.48'
+    implementation 'org.apache.sshd:sshd-core:0.13.0'
+    implementation 'org.apache.mina:mina-core:2.0.9'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:3.6.0.201411121045-m1'
+    implementation 'commons-validator:commons-validator:1.4.0'
+    implementation 'org.bouncycastle:bcprov-jdk16:1.46'
 }
