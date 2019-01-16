@@ -210,8 +210,13 @@ public class SSHDaemonService extends Service implements PasswordAuthenticator, 
                     return false;
                 }
 
-                PublicKey knownkey = decodePublicKey(user.getPublickey());
-                return ((RSAPublicKey) knownkey).getModulus().equals(((RSAPublicKey) key).getModulus());
+                String[] keys = user.getPublickey().split("-");
+                for (String pubKey : keys){
+                    if (((RSAPublicKey) decodePublicKey(pubKey.trim())).getModulus().equals(((RSAPublicKey) key).getModulus()))
+                        return true;
+                }
+
+                return false;
 
             } catch (SQLException e) {
                 Log.e(TAG, "Problem while retrieving user form database.", e);
