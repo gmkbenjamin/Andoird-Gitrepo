@@ -3,7 +3,7 @@ package io.github.gmkbenjamin.gitrepo.beta.dns;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 

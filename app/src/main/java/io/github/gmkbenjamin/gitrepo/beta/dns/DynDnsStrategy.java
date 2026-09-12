@@ -4,19 +4,17 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.util.Base64;
 import android.util.Log;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.C;
 
@@ -42,46 +40,49 @@ public class DynDnsStrategy extends DynamicDNS {
     }
 
     public void update(String hostname, String address, String username, String password) {
-        HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
-        HttpConnectionParams.setSoTimeout(httpParams, 3000);
-
-        DefaultHttpClient httpClient = new DefaultHttpClient(httpParams);
+        HttpURLConnection connection = null;
         try {
-            httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY,
-                    new UsernamePasswordCredentials(username, password));
-
-
             String url = String.format(URL_TEMPLATE, hostname, address);
+            Log.i(TAG, "executing request " + url);
 
-            HttpGet httpGet = new HttpGet(url);
-            httpGet.setHeader("User-Agent", "Gidder - Android - 1.0");
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(3000);
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", "Gidder - Android - 1.0");
+            String credentials = username + ":" + password;
+            String basicAuth = "Basic " + Base64.encodeToString(
+                    credentials.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
+            connection.setRequestProperty("Authorization", basicAuth);
 
-            Log.i(TAG, "executing request " + httpGet.getRequestLine());
-            HttpResponse response = httpClient.execute(httpGet);
-            HttpEntity entity = response.getEntity();
+            int status = connection.getResponseCode();
+            Log.i(TAG, "HTTP status: " + status);
 
-            Log.i(TAG, response.getStatusLine().toString());
-            if (entity == null) {
+            InputStream stream = status >= 400 ? connection.getErrorStream() : connection.getInputStream();
+            if (stream == null) {
                 Log.w(TAG, "Response entity is empty!");
+                return;
             }
 
-            String content = EntityUtils.toString(entity);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            StringBuilder contentBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                contentBuilder.append(line);
+            }
+            reader.close();
 
-            if (content == null || "".equals(content.trim())) {
+            String content = contentBuilder.toString().trim();
+            if (content.isEmpty()) {
                 Log.w(TAG, "Content is empty!");
                 return;
             }
 
-            content = content.trim();
-
             Log.i(TAG, "Content: " + content);
 
-            if (content.startsWith(RETURN_CODE_GOOD)) {
+            if (content.startsWith(RETURN_CODE_GOOD) || content.startsWith(RETURN_CODE_NOCHG)) {
                 makeToast("Dynamic DNS was successfully updated.");
-            } else if (content.startsWith(RETURN_CODE_NOCHG)) {
-                makeToast("Dynamic DNS was successfully updated.");
-            } else if (content.startsWith(RETURN_CODE_NOHOST)) {
+            } else if (content.startsWith(RETURN_CODE_NOHOST) || content.startsWith(RETURN_CODE_NOTFQDN)) {
                 makeToast("Dynamic DNS hostname is incorrect.");
             } else if (content.startsWith(RETURN_CODE_BADAUTH)) {
                 makeToast("Dynamic DNS authentication failed.");
@@ -91,31 +92,33 @@ public class DynDnsStrategy extends DynamicDNS {
                 Log.w(TAG, "Update request include feature that is not available for the user!");
             } else if (content.startsWith(RETURN_CODE_ABUSE)) {
                 makeToast("Dynamic DNS username abuse problem.");
-            } else if (content.startsWith(RETURN_CODE_911)) {
+            } else if (content.startsWith(RETURN_CODE_911) || content.startsWith(RETURN_CODE_DNSERR)) {
                 makeToast("Dynamic DNS provider has fatal problem.");
-            } else if (content.startsWith(RETURN_CODE_DNSERR)) {
-                makeToast("Dynamic DNS provider has fatal problem.");
-            } else if (content.startsWith(RETURN_CODE_NOTFQDN)) {
-                makeToast("Dynamic DNS hostname is incorrect.");
             }
-
-        } catch (ConnectTimeoutException e) {
+        } catch (SocketTimeoutException e) {
             Log.w(TAG, "WiFi is not yet connected! Try again in a minute.", e);
-
-            Intent broadcastIntent = new Intent(C.action.UPDATE_DYNAMIC_DNS_ADDRESS);
-            broadcastIntent.putExtra("scheduled", true);
-
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, broadcastIntent, 0);
-
-            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 60L * 1000L, pendingIntent);
+            scheduleRetry();
         } catch (Exception e) {
             Log.e(TAG, "Problem updating dynamic DNS.", e);
             makeToast("Problem updating dynamic DNS.");
         } finally {
-            httpClient.getConnectionManager().shutdown();
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
-        return;
     }
 
+    private void scheduleRetry() {
+        Intent broadcastIntent = new Intent(C.action.UPDATE_DYNAMIC_DNS_ADDRESS);
+        broadcastIntent.putExtra("scheduled", true);
+
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, broadcastIntent, flags);
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 60L * 1000L, pendingIntent);
+    }
 }

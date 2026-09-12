@@ -2,16 +2,15 @@ package io.github.gmkbenjamin.gitrepo.beta.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
+import android.view.Menu;
+import android.view.MenuItem;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.Tab;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,24 +21,25 @@ import io.github.gmkbenjamin.gitrepo.beta.ui.fragment.FragmentFactory;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.C;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.FragmentType;
 
-public class SetupActivity extends SherlockFragmentActivity {
+public class SetupActivity extends AppCompatActivity {
 
     private ViewPager viewPager;
     private FragmentType currentFragment = FragmentType.USERS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.Theme_Sherlock);
         super.onCreate(savedInstanceState);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         setContentView(R.layout.setup);
-        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        viewPager = (ViewPager) findViewById(R.id.pager);
+        viewPager = findViewById(R.id.pager);
+        TabLayout tabLayout = findViewById(R.id.tabs);
 
-        new SetupAdapter(this, viewPager);
+        new SetupAdapter(this, viewPager, tabLayout);
 
         if (savedInstanceState != null) {
             viewPager.setCurrentItem(savedInstanceState.getInt("tabSelection"));
@@ -60,6 +60,7 @@ public class SetupActivity extends SherlockFragmentActivity {
 
             finish();
             startActivity(intent);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -111,31 +112,29 @@ public class SetupActivity extends SherlockFragmentActivity {
     }
 
     public static class SetupAdapter extends FragmentPagerAdapter
-            implements ViewPager.OnPageChangeListener, ActionBar.TabListener {
+            implements ViewPager.OnPageChangeListener {
 
         private final ViewPager pager;
         private final SetupActivity activity;
-        private List<BaseFragment> fragments;
+        private final List<BaseFragment> fragments;
+        private final List<String> titles;
 
-        public SetupAdapter(SetupActivity activity, ViewPager pager) {
-            super(activity.getSupportFragmentManager());
+        public SetupAdapter(SetupActivity activity, ViewPager pager, TabLayout tabLayout) {
+            super(activity.getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
             this.activity = activity;
             this.pager = pager;
 
             FragmentType[] fragmentTypes = FragmentType.values();
-            fragments = new ArrayList<BaseFragment>(fragmentTypes.length);
+            fragments = new ArrayList<>(fragmentTypes.length);
+            titles = new ArrayList<>(fragmentTypes.length);
             for (FragmentType fragmentType : fragmentTypes) {
                 fragments.add(FragmentFactory.createFragment(fragmentType));
-
-                ActionBar.Tab tab = activity.getSupportActionBar().newTab();
-                tab.setTabListener(this);
-                tab.setText(fragmentType.getTitle());
-                activity.getSupportActionBar().addTab(tab);
+                titles.add(fragmentType.getTitle());
             }
 
-
             this.pager.setAdapter(this);
-            this.pager.setOnPageChangeListener(this);
+            this.pager.addOnPageChangeListener(this);
+            tabLayout.setupWithViewPager(this.pager);
         }
 
         private void disableActionMode() {
@@ -147,6 +146,11 @@ public class SetupActivity extends SherlockFragmentActivity {
         @Override
         public Fragment getItem(int position) {
             return fragments.get(position % fragments.size());
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return titles.get(position % titles.size());
         }
 
         @Override
@@ -167,25 +171,9 @@ public class SetupActivity extends SherlockFragmentActivity {
 
         @Override
         public void onPageSelected(int position) {
-            activity.getSupportActionBar().setSelectedNavigationItem(position);
+            disableActionMode();
             activity.setCurrentFragment(FragmentType.values()[position]);
             activity.invalidateOptionsMenu();
         }
-
-        @Override
-        public void onTabReselected(Tab tab, FragmentTransaction transaction) {
-            disableActionMode();
-        }
-
-        @Override
-        public void onTabSelected(Tab tab, FragmentTransaction transaction) {
-            disableActionMode();
-            pager.setCurrentItem(tab.getPosition());
-        }
-
-        @Override
-        public void onTabUnselected(Tab tab, FragmentTransaction transaction) {
-        }
-
     }
 }

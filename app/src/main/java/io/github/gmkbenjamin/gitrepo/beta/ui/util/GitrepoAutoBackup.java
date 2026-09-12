@@ -8,7 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 
 import org.bouncycastle.crypto.CryptoException;
 

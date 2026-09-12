@@ -17,9 +17,9 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import androidx.appcompat.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -129,7 +129,7 @@ public class UsersFragment extends BaseFragment implements OnItemLongClickListen
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        actionMode = getSherlockActivity().startActionMode(new UserListActionMode(position));
+        actionMode = ((androidx.appcompat.app.AppCompatActivity) requireActivity()).startSupportActionMode(new UserListActionMode(position));
 
         return true;
     }
@@ -165,10 +165,10 @@ public class UsersFragment extends BaseFragment implements OnItemLongClickListen
             final User user = usersListAdapter.getItem(position);
             mode.setTitle(user.getFullname());
 
-            menu.add("Delete")
-                    .setIcon(R.drawable.ic_actionbar_delete)
-                    .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                    .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            MenuItem tmpMenuItem = menu.add("Delete");
+            tmpMenuItem.setIcon(R.drawable.ic_actionbar_delete);
+            tmpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            tmpMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
@@ -197,9 +197,9 @@ public class UsersFragment extends BaseFragment implements OnItemLongClickListen
                     });
 
             if (!user.isActive()) {
-                menu.add("Activate")
-                        .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                        .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                tmpMenuItem = menu.add("Activate");
+            tmpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            tmpMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
@@ -218,9 +218,9 @@ public class UsersFragment extends BaseFragment implements OnItemLongClickListen
 
                         });
             } else {
-                menu.add("Deactivate")
-                        .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                        .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                tmpMenuItem = menu.add("Deactivate");
+            tmpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            tmpMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
@@ -240,10 +240,10 @@ public class UsersFragment extends BaseFragment implements OnItemLongClickListen
                         });
             }
 
-            menu.add("Edit")
-                    .setIcon(R.drawable.ic_actionbar_edit)
-                    .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                    .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            tmpMenuItem = menu.add("Edit");
+            tmpMenuItem.setIcon(R.drawable.ic_actionbar_edit);
+            tmpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            tmpMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {

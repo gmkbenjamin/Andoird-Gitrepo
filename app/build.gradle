@@ -1,44 +1,61 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '27.0.3'
+    namespace 'io.github.gmkbenjamin.gitrepo.beta'
+    compileSdk 35
+
     defaultConfig {
         applicationId "io.github.gmkbenjamin.gitrepo.beta"
-        minSdkVersion 9
-        targetSdkVersion 16
+        minSdk 21
+        targetSdk 35
+        versionCode 8
+        versionName "0.02"
     }
+
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
         }
     }
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
-    packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/NOTICE'
+
+    packaging {
+        resources {
+            excludes += [
+                    'META-INF/LICENSE.txt',
+                    'META-INF/NOTICE.txt',
+                    'META-INF/DEPENDENCIES',
+                    'META-INF/LICENSE',
+                    'META-INF/NOTICE'
+            ]
+        }
     }
-    lintOptions {
+
+    lint {
         abortOnError false
-    }
-    productFlavors {
     }
 }
 
 dependencies {
-    implementation 'com.android.support:support-v4:21.0.+'
-    implementation 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
-    implementation 'com.j256.ormlite:ormlite-android:4.48'
-    implementation 'org.apache.sshd:sshd-core:0.13.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.fragment:fragment:1.8.5'
+    implementation 'androidx.viewpager:viewpager:1.0.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.preference:preference:1.2.1'
+
+    implementation 'com.j256.ormlite:ormlite-android:5.1'
+    implementation 'com.j256.ormlite:ormlite-core:5.1'
+
+    implementation 'org.apache.sshd:sshd-core:0.14.0'
     implementation 'org.apache.mina:mina-core:2.0.9'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit:3.6.0.201411121045-m1'
-    implementation 'commons-validator:commons-validator:1.4.0'
-    implementation 'org.bouncycastle:bcprov-jdk16:1.46'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:3.7.1.201504261725-r'
+    implementation 'commons-validator:commons-validator:1.7'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
 }

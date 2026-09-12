@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 
-import com.actionbarsherlock.view.Window;
-
 import io.github.gmkbenjamin.gitrepo.beta.R;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.C;
 
@@ -23,7 +21,9 @@ public class SplashScreenActivity extends BaseActivity {
 
     @Override
     protected void setup() {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
         setContentView(R.layout.splash_screen);
     }
 
@@ -31,8 +31,5 @@ public class SplashScreenActivity extends BaseActivity {
     protected void initComponents(Bundle savedInstanceState) {
         handler = new Handler();
         handler.postDelayed(timeoutRunnable, 3L * 1000L);
-
     }
-
-
 }

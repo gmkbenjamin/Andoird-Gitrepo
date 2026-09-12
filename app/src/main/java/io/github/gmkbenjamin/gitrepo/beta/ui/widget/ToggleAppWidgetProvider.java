@@ -38,7 +38,11 @@ public class ToggleAppWidgetProvider extends AppWidgetProvider {
         public void buildRemoteView(Context context) {
             RemoteViews updateView = null;
 
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent(C.action.TOGGLE_SSH_SERVER), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    new Intent(C.action.TOGGLE_SSH_SERVER),
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.toggle_widget);
             views.setOnClickPendingIntent(R.id.toggleWidgetButton, pendingIntent);

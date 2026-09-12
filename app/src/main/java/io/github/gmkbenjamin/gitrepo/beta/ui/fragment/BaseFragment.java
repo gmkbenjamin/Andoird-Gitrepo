@@ -3,15 +3,15 @@ package io.github.gmkbenjamin.gitrepo.beta.ui.fragment;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.view.ActionMode;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.view.ActionMode;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
 
 import io.github.gmkbenjamin.gitrepo.beta.db.DBHelper;
 
-public abstract class BaseFragment extends SherlockFragment {
+public abstract class BaseFragment extends Fragment {
 
     protected ActionMode actionMode;
     private volatile DBHelper helper;

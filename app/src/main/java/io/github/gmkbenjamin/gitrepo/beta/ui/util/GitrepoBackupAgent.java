@@ -7,7 +7,7 @@ import android.app.backup.SharedPreferencesBackupHelper;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.widget.EditText;
 
 import org.bouncycastle.crypto.CryptoException;
