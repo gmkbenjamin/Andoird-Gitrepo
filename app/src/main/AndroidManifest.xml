@@ -1,22 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    package="io.github.gmkbenjamin.gitrepo.beta"
-    android:versionCode="8"
-    android:versionName="0.02">
-
-    <uses-sdk
-        android:minSdkVersion="9"
-        android:targetSdkVersion="16" />
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-   <!-- <uses-permission android:name="android.permission.READ_CONTACTS" /> -->
-    <!--<uses-permission android:name="android.permission.READ_PHONE_STATE" /> -->
-    <!-- android:fullBackupContent="@xml/backup_rules" seems to be an unknown attribute? perform excluding manually -->
-    <!-- add this below to enable auto backup and disable key/value backup android:fullBackupOnly="true"-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <application
         android:name="io.github.gmkbenjamin.gitrepo.beta.app.GitrepoApplication"
         android:icon="@drawable/ic_launcher"
@@ -24,10 +18,16 @@
         android:theme="@style/Theme.Styled"
         android:allowBackup="true"
         android:fullBackupOnly="true"
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:backupAgent="io.github.gmkbenjamin.gitrepo.beta.ui.util.GitrepoBackupAgent">
-        <meta-data android:name="com.google.android.backup.api_key" android:value="AEdPqrEAAAAIWwKGE2JHKaVH0ses2vuB3FW5UgrxJjvqtnfmiA" />
+        <meta-data
+            android:name="com.google.android.backup.api_key"
+            android:value="AEdPqrEAAAAIWwKGE2JHKaVH0ses2vuB3FW5UgrxJjvqtnfmiA" />
 
-        <activity android:name="io.github.gmkbenjamin.gitrepo.beta.ui.activity.SplashScreenActivity">
+        <activity
+            android:name="io.github.gmkbenjamin.gitrepo.beta.ui.activity.SplashScreenActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -36,7 +36,6 @@
 
         <activity
             android:name="io.github.gmkbenjamin.gitrepo.beta.ui.activity.AddUserActivity"
-            android:uiOptions="splitActionBarWhenNarrow"
             android:exported="false">
             <intent-filter>
                 <action android:name="io.github.gmkbenjamin.gitrepo.beta.START_ADD_USER_ACTIVITY" />
@@ -46,7 +45,6 @@
 
         <activity
             android:name="io.github.gmkbenjamin.gitrepo.beta.ui.activity.AddRepositoryActivity"
-            android:uiOptions="splitActionBarWhenNarrow"
             android:exported="false">
             <intent-filter>
                 <action android:name="io.github.gmkbenjamin.gitrepo.beta.START_ADD_REPOSITORY_ACTIVITY" />
@@ -66,7 +64,6 @@
 
         <activity
             android:name="io.github.gmkbenjamin.gitrepo.beta.ui.activity.HomeActivity"
-            android:uiOptions="splitActionBarWhenNarrow"
             android:exported="true"
             android:launchMode="singleTask">
             <intent-filter>
@@ -78,7 +75,6 @@
         <activity
             android:name="io.github.gmkbenjamin.gitrepo.beta.ui.activity.DynamicDNSActivity"
             android:label="DNS"
-            android:uiOptions="splitActionBarWhenNarrow"
             android:exported="false">
             <intent-filter>
                 <action android:name="io.github.gmkbenjamin.gitrepo.beta.START_DYNAMIC_DNS_ACTIVITY" />
@@ -89,7 +85,6 @@
         <activity
             android:name="io.github.gmkbenjamin.gitrepo.beta.ui.activity.UserDetailsActivity"
             android:label="User Details"
-            android:uiOptions="splitActionBarWhenNarrow"
             android:exported="false">
             <intent-filter>
                 <action android:name="io.github.gmkbenjamin.gitrepo.beta.START_USER_DETAILS" />
@@ -100,7 +95,6 @@
         <activity
             android:name="io.github.gmkbenjamin.gitrepo.beta.ui.activity.RepositoryDetailsActivity"
             android:label="Repository Details"
-            android:uiOptions="splitActionBarWhenNarrow"
             android:exported="false">
             <intent-filter>
                 <action android:name="io.github.gmkbenjamin.gitrepo.beta.START_REPOSITORY_DETAILS" />
@@ -111,7 +105,6 @@
         <activity
             android:name="io.github.gmkbenjamin.gitrepo.beta.ui.activity.SetupActivity"
             android:label="Setup"
-            android:uiOptions="splitActionBarWhenNarrow"
             android:exported="false">
             <intent-filter>
                 <action android:name="io.github.gmkbenjamin.gitrepo.beta.START_SETUP_ACTIVITY" />
@@ -121,7 +114,11 @@
 
         <service
             android:name="io.github.gmkbenjamin.gitrepo.beta.service.SSHDaemonService"
-            android:exported="false">
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Local SSH git server daemon" />
             <intent-filter>
                 <action android:name="io.github.gmkbenjamin.gitrepo.beta.START_SSH_SERVER" />
             </intent-filter>
@@ -163,7 +160,6 @@
                 <action android:name="io.github.gmkbenjamin.gitrepo.beta.TOGGLE_SSH_SERVER" />
             </intent-filter>
         </receiver>
-
 
     </application>
 

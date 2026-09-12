@@ -62,7 +62,6 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/repo_backup">
         <CheckBoxPreference
-            android:id="@+id/repo_backup"
             android:key="repo_backup"
             android:title="@string/repo_backup"
             android:summaryOn="Repositories are backed up using Android Backup. Disable and enable again to change password."

@@ -6,7 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +19,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import androidx.appcompat.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -323,7 +323,7 @@ public class RepositoryDetailsActivity extends BaseActivity implements OnItemLon
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        startActionMode(new RepositoryPermissionActionMode(position));
+        startSupportActionMode(new RepositoryPermissionActionMode(position));
     }
 
     @Override
@@ -435,10 +435,10 @@ public class RepositoryDetailsActivity extends BaseActivity implements OnItemLon
             final Permission permission = permissionsListAdapter.getItem(position);
             mode.setTitle(permission.getUser().getFullname());
 
-            menu.add("Remove")
-                    .setIcon(R.drawable.ic_actionbar_delete)
-                    .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                    .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            MenuItem tmpMenuItem = menu.add("Remove");
+            tmpMenuItem.setIcon(R.drawable.ic_actionbar_delete);
+            tmpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            tmpMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
@@ -457,9 +457,9 @@ public class RepositoryDetailsActivity extends BaseActivity implements OnItemLon
 
                     });
 
-            menu.add("Details")
-                    .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                    .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            tmpMenuItem = menu.add("Details");
+            tmpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            tmpMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
@@ -476,9 +476,9 @@ public class RepositoryDetailsActivity extends BaseActivity implements OnItemLon
                     });
 
             if (!permission.isReadOnly()) {
-                menu.add("Pull")
-                        .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                        .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                tmpMenuItem = menu.add("Pull");
+            tmpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            tmpMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
@@ -498,9 +498,9 @@ public class RepositoryDetailsActivity extends BaseActivity implements OnItemLon
 
                         });
             } else {
-                menu.add("Pull & Push")
-                        .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                        .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                tmpMenuItem = menu.add("Pull & Push");
+            tmpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            tmpMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
