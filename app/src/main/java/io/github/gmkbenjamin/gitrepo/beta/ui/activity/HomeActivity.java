@@ -12,8 +12,11 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+
+import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -31,8 +34,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import java.io.File;
 import java.io.IOException;
@@ -304,15 +307,21 @@ public class HomeActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
 
-        registerReceiver(connectivityChangeBroadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        ContextCompat.registerReceiver(
+                this,
+                connectivityChangeBroadcastReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION),
+                ContextCompat.RECEIVER_NOT_EXPORTED);
 
         IntentFilter sshdIntentFilter = new IntentFilter();
         sshdIntentFilter.addAction(C.action.SSHD_STARTED);
         sshdIntentFilter.addAction(C.action.SSHD_STOPPED);
 
-        registerReceiver(sshdBroadcastReceiver, sshdIntentFilter);
-
-
+        ContextCompat.registerReceiver(
+                this,
+                sshdBroadcastReceiver,
+                sshdIntentFilter,
+                ContextCompat.RECEIVER_NOT_EXPORTED);
     }
 
     @Override
@@ -338,7 +347,11 @@ public class HomeActivity extends BaseActivity {
                     return;
                 }
 
-                startService(intent);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ContextCompat.startForegroundService(v.getContext(), intent);
+                } else {
+                    startService(intent);
+                }
             } else {
                 stopService(intent);
             }

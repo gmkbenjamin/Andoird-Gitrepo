@@ -5,8 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
-import android.preference.PreferenceManager;
+import android.os.Build;
 import android.util.Log;
+
+import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import io.github.gmkbenjamin.gitrepo.beta.app.GitrepoApplication;
 import io.github.gmkbenjamin.gitrepo.beta.dns.DynamicDNSManager;
@@ -37,8 +40,12 @@ public class ConnectivityChangeBroadcastReceiver extends BroadcastReceiver {
                 }
 
                 if (autostartOnWifiOn && !GitrepoCommons.isSshServiceRunning(context)) {
-                    context.startService(new Intent(context, SSHDaemonService.class));
-                    GitrepoCommons.makeStatusBarNotification(context);
+                    Intent serviceIntent = new Intent(context, SSHDaemonService.class);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        ContextCompat.startForegroundService(context, serviceIntent);
+                    } else {
+                        context.startService(serviceIntent);
+                    }
                 }
             } else {
                 Log.i(TAG, "WiFi is NOT active!");
@@ -49,7 +56,5 @@ public class ConnectivityChangeBroadcastReceiver extends BroadcastReceiver {
                 }
             }
         }
-
     }
-
 }
