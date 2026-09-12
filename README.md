@@ -27,6 +27,31 @@ Modernisation already merged on `master`:
 - AndroidX AppCompat / Material / Preference (ActionBarSherlock removed)
 - `compileSdk` / `targetSdk` **35**, `minSdk` **21**, Java **17**
 
+## Screenshots
+
+Captured from a debug build on an Android 14 emulator (`assembleDebug`).
+
+| Splash | Home (server stopped) | Home (SSH running) |
+|:---:|:---:|:---:|
+| ![Splash](docs/screenshots/01-splash.png) | ![Home](docs/screenshots/02-home.png) | ![SSH running](docs/screenshots/03-home-ssh-running.png) |
+
+| Settings | Dynamic DNS | Setup → Users |
+|:---:|:---:|:---:|
+| ![Settings](docs/screenshots/04-settings.png) | ![Dynamic DNS](docs/screenshots/05-dynamic-dns.png) | ![Users](docs/screenshots/06-setup-users.png) |
+
+| Add user | User details | Setup → Repositories |
+|:---:|:---:|:---:|
+| ![Add user](docs/screenshots/07-add-user.png) | ![User details](docs/screenshots/08-user-details.png) | ![Repositories](docs/screenshots/09-setup-repositories.png) |
+
+| Add repository | Repository details |
+|:---:|:---:|
+| ![Add repository](docs/screenshots/10-add-repository.png) | ![Repository details](docs/screenshots/11-repository-details.png) |
+
+- **Home**: Wi‑Fi status and Start/Stop for the SSH Git server; when running, the listen address (`ip:port`) is shown.
+- **Settings**: SSH port, notification, Wi‑Fi autostart/autostop, shell, SCP, and backup options.
+- **Dynamic DNS**: Optional DynDNS / No-IP hostname updates.
+- **Setup**: Manage users and bare repositories; details screens show permissions and the SSH clone URL.
+
 ## Requirements
 
 | Item | Version / notes |
