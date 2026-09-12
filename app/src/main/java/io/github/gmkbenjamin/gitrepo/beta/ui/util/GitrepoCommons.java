@@ -3,17 +3,23 @@ package io.github.gmkbenjamin.gitrepo.beta.ui.util;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
+import android.os.Build;
+
+import androidx.core.app.NotificationCompat;
+import androidx.preference.PreferenceManager;
+
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
@@ -37,7 +43,23 @@ import io.github.gmkbenjamin.gitrepo.beta.service.SSHDaemonService;
 
 public abstract class GitrepoCommons {
     private final static int SSH_STARTED_NOTIFICATION_ID = 1;
+    public static final String SSH_NOTIFICATION_CHANNEL_ID = "gitrepo_ssh_channel";
     private static boolean hotspot = false;
+
+    public static void ensureNotificationChannel(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager.getNotificationChannel(SSH_NOTIFICATION_CHANNEL_ID) == null) {
+                NotificationChannel channel = new NotificationChannel(
+                        SSH_NOTIFICATION_CHANNEL_ID,
+                        "SSH Server",
+                        NotificationManager.IMPORTANCE_LOW);
+                channel.setDescription("Ongoing notification while the SSH git server is running");
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+    }
 
     public static int convertDpToPixels(WindowManager windowManager, float dp) {
         DisplayMetrics metrics = new DisplayMetrics();
@@ -64,31 +86,57 @@ public abstract class GitrepoCommons {
 
     public static boolean isEthernetConnected(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Network network = connectivityManager.getActiveNetwork();
+            if (network == null) {
+                return false;
+            }
+            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
+            return capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET);
+        }
         NetworkInfo info = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
-        //NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         return info != null && info.isConnected();
     }
 
     public static boolean isWifiConnected(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Network network = connectivityManager.getActiveNetwork();
+            if (network != null) {
+                NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
+                if (capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    return true;
+                }
+            }
+            return hotspot;
+        }
         NetworkInfo info = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
-        if (info.isConnected()) {
+        if (info != null && info.isConnected()) {
             return true;
         } else {
-            if (hotspot)
-                return true;
-            return false;
+            return hotspot;
         }
     }
 
     public static String getWifiSSID(Context context) {
-        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (!info.isConnected() && hotspot)
+        boolean wifiConnected = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Network network = connectivityManager.getActiveNetwork();
+            if (network != null) {
+                NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
+                wifiConnected = capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+            }
+        } else {
+            NetworkInfo info = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            wifiConnected = info != null && info.isConnected();
+        }
+        if (!wifiConnected && hotspot) {
             return "Hotspot Mode";
-        return wifiManager.getConnectionInfo().getSSID();
+        }
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        return wifiInfo != null ? wifiInfo.getSSID() : null;
     }
 
     public static int convertInet4AddrToInt(byte[] addr) {
@@ -255,14 +303,20 @@ public abstract class GitrepoCommons {
     }
 
     public static void makeStatusBarNotification(Context context) {
+        ensureNotificationChannel(context);
+
         Intent notificationIntent = new Intent(C.action.START_HOME_ACTIVITY);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 1, notificationIntent, 0);
+        int pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingFlags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 1, notificationIntent, pendingFlags);
 
         String currentAddress = GitrepoCommons.getCurrentServerAddress(context, PreferenceManager.getDefaultSharedPreferences(context));
 
-        Notification notification = new NotificationCompat.Builder(context)
+        Notification notification = new NotificationCompat.Builder(context, SSH_NOTIFICATION_CHANNEL_ID)
                 .setDefaults(Notification.DEFAULT_SOUND)
                 .setTicker("SSH server started!")
                 .setContentIntent(contentIntent)
@@ -275,6 +329,33 @@ public abstract class GitrepoCommons {
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(SSH_STARTED_NOTIFICATION_ID, notification);
+    }
+
+    public static Notification buildForegroundNotification(Context context) {
+        ensureNotificationChannel(context);
+
+        Intent notificationIntent = new Intent(C.action.START_HOME_ACTIVITY);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        int pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingFlags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 1, notificationIntent, pendingFlags);
+        String currentAddress = GitrepoCommons.getCurrentServerAddress(context, PreferenceManager.getDefaultSharedPreferences(context));
+
+        return new NotificationCompat.Builder(context, SSH_NOTIFICATION_CHANNEL_ID)
+                .setContentIntent(contentIntent)
+                .setSmallIcon(R.drawable.ic_stat_notification)
+                .setContentText(currentAddress)
+                .setContentTitle("SSH server is running")
+                .setOngoing(true)
+                .setWhen(System.currentTimeMillis())
+                .build();
+    }
+
+    public static int getSshNotificationId() {
+        return SSH_STARTED_NOTIFICATION_ID;
     }
 
     public static boolean isSshServiceRunning(Context context) {

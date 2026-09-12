@@ -5,8 +5,12 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ServiceInfo;
+import android.os.Build;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
+
+import androidx.preference.PreferenceManager;
+
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -98,6 +102,18 @@ public class SSHDaemonService extends Service implements PasswordAuthenticator, 
         boolean sshShell = prefs.getBoolean(PrefsConstants.SSH_SHELL.getKey(),
                 "true".equals(PrefsConstants.SSH_SHELL.getDefaultValue()) ? true : false);
         boolean scp = prefs.getBoolean(PrefsConstants.SCP.getKey(), "true".equals(PrefsConstants.SCP.getDefaultValue()) ? true : false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                    GitrepoCommons.getSshNotificationId(),
+                    GitrepoCommons.buildForegroundNotification(this),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+        } else {
+            startForeground(
+                    GitrepoCommons.getSshNotificationId(),
+                    GitrepoCommons.buildForegroundNotification(this));
+        }
+
         sshServer = SshServer.setUpDefaultServer();
         sshServer.setPort(Integer.parseInt(sshPort));
         sshServer.setKeyPairProvider(new GitrepoHostKeyProvider(this));
@@ -151,6 +167,7 @@ public class SSHDaemonService extends Service implements PasswordAuthenticator, 
             Log.i(TAG, "SSHd started!");
         } catch (IOException e) {
             Log.e(TAG, "Problem when starting SSHd.", e);
+            stopSelf();
         }
 
         return START_STICKY;
