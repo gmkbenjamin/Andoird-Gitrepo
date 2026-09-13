@@ -7,8 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -26,15 +24,8 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 import io.github.gmkbenjamin.gitrepo.beta.R;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.C;
-import io.github.gmkbenjamin.gitrepo.beta.ui.util.Logger;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.PrefsConstants;
 
 public class GitrepoPreferencesActivity extends AppCompatActivity {
@@ -52,34 +43,6 @@ public class GitrepoPreferencesActivity extends AppCompatActivity {
                     .beginTransaction()
                     .replace(android.R.id.content, new GitrepoPreferenceFragment())
                     .commit();
-        }
-    }
-
-    public void emailLog(String[] addresses, String subject, String body, Uri attachment) {
-        try {
-            FileInputStream file = new FileInputStream(new File(getApplicationInfo().dataDir + "/log"));
-            StringBuilder sb = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(file));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\n");
-            }
-            reader.close();
-            body += "\n\n\n" + sb.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_EMAIL, addresses);
-        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        intent.putExtra(Intent.EXTRA_TEXT, body);
-        intent.putExtra(Intent.EXTRA_STREAM, attachment);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(Intent.createChooser(intent, "Send email..."));
-            finish();
-        } else {
-            Toast.makeText(this, getResources().getString(R.string.no_email_client), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -217,20 +180,6 @@ public class GitrepoPreferencesActivity extends AppCompatActivity {
                             editor.putString("password", "");
                             editor.commit();
                         }
-                        return true;
-                    }
-                });
-            }
-
-            Preference emailLog = findPreference(getString(R.string.email_log));
-            if (emailLog != null) {
-                emailLog.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(Preference preference) {
-                        Resources res = getResources();
-                        GitrepoPreferencesActivity activity = (GitrepoPreferencesActivity) requireActivity();
-                        activity.emailLog(new String[]{res.getString(R.string.email)},
-                                res.getString(R.string.debug_log), Logger.getIntInfo(), null);
                         return true;
                     }
                 });
