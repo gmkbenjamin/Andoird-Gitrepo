@@ -19,7 +19,6 @@ What the current `master` build actually provides:
 - **Settings**: SSH port, status-bar notification, Wi‑Fi autostart/autostop, optional SSH shell, optional SCP
 - **Encrypted repository backup** via Android Backup (experimental; requires an encryption password in Settings)
 - **Home-screen widget** to toggle the SSH server
-- **Email debug log** action in Settings
 
 Modernisation already merged on `master`:
 
@@ -133,7 +132,6 @@ Password auth uses the password set for the user in the app. Public-key auth exp
 | SSH Shell | off | Allow interactive shell (`/system/bin/sh`); use client `-T` when enabled |
 | SCP | off | Enable SCP command factory (summary notes `/sdcard` writability) |
 | Repo backup | off | Encrypt/zip repos into Android Backup; set password when enabling |
-| Email log | — | Compose email with debug/network info |
 
 Start-on-boot and a custom repositories-directory preference exist in code/history but are **not** exposed in the current Settings UI. Repositories default to:
 
