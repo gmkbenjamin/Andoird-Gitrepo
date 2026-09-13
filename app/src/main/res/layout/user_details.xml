@@ -44,7 +44,7 @@
             android:layout_marginTop="4dp"
             android:layout_marginRight="5dp"
             android:layout_marginLeft="10dp"
-            android:text="antoniy@gmail.com"
+            android:text=""
             android:textColor="@android:color/secondary_text_dark"
             android:textStyle="italic"
             android:textSize="14sp" />

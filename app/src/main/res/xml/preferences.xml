@@ -70,13 +70,5 @@
              />
 
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/email_log">
-
-        <Preference
-            android:key="@string/email_log"
-            android:title="@string/email_log"
-            android:summary="Email debug information to developer" />
-
-    </PreferenceCategory>
 
 </PreferenceScreen>
