@@ -64,10 +64,6 @@
     <string name="add_repository_activate">Activate repository</string>
     <string name="server_settings">Server Settings</string>
     <string name="general_settings">General Settings</string>
-    <string name="email_log">Email Log</string>
-    <string name="email">gmkbenjamin@hotmail.com</string>
-    <string name="debug_log">Debug Log</string>
-    <string name="no_email_client">Cannot find an email client</string>
     <string name="updates"></string>
     <string name="repo_backup">Backup Repository</string>
 

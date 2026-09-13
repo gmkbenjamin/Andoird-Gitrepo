@@ -47,7 +47,7 @@ public class NoIpStrategy extends DynamicDNS {
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(3000);
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", "Gitrepo/1.0 gmkbenjamin@hotmail.com");
+            connection.setRequestProperty("User-Agent", "Gitrepo/1.0");
             String credentials = username + ":" + password;
             String basicAuth = "Basic " + Base64.encodeToString(
                     credentials.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
