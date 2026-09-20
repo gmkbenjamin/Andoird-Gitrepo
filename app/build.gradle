@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+    testImplementation 'junit:junit:4.13.2'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.fragment:fragment:1.8.5'
     implementation 'androidx.viewpager:viewpager:1.0.0'

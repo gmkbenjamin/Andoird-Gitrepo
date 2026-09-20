@@ -26,7 +26,7 @@ import java.util.zip.ZipOutputStream;
 import javax.crypto.BadPaddingException;
 
 
-public class GitrepoBackupAgent extends BackupAgentHelper {
+public final class GitrepoBackupAgent {
 
     // The name of the SharedPreferences file
     static final String PREFS = "io.github.gmkbenjamin.gitrepo.beta_preferences";
@@ -35,31 +35,30 @@ public class GitrepoBackupAgent extends BackupAgentHelper {
     // A key to uniquely identify the set of backup data
     static final String PREFS_BACKUP_KEY = "prefs";
 
-    public static boolean restore(Context ctx, String password, SharedPreferences prefs, Dialog dialog, EditText passwordinput) throws BadPaddingException, IOException {
+    public static boolean restore(Context ctx, String password) throws BadPaddingException, IOException {
+        File encrypted = new File(ctx.getDatabasePath("gitrepo.db").getParentFile(), "gitrepo.zip_enc");
+        File plain = File.createTempFile("gitrepo-restore-", ".zip", ctx.getNoBackupFilesDir());
         try {
-
-            Crypto.decrypt(password, new File(ctx.getDatabasePath("gitrepo.db").getParent() + "/gitrepo.zip_enc"), new File(ctx.getDatabasePath("gitrepo.db").getParent() + "/gitrepo.zip"));
-            GitrepoBackupAgent.unzip(new File(ctx.getDatabasePath("gitrepo.db").getParent() + "/gitrepo.zip"), new File(Environment.getExternalStorageDirectory().getPath()));
-            GitrepoBackupAgent.populateDirectory();
-            new File(ctx.getDatabasePath("gitrepo.db").getParent() + "/gitrepo.zip_enc").delete();
-            new File(ctx.getDatabasePath("gitrepo.db").getParent() + "/gitrepo.zip").delete();
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("password", password);
-            editor.commit();
-            dialog.dismiss();
+            Crypto.decrypt(password, encrypted, plain);
+            unzip(plain, Environment.getExternalStorageDirectory());
+            populateDirectory();
+            if (!encrypted.delete()) {
+                throw new IOException("Could not remove restored encrypted archive");
+            }
             return true;
-        } catch (CryptoException e) {
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("password", "");
-            editor.commit();
-            e.printStackTrace();
+        } catch (CryptoException wrongPassword) {
             return false;
+        } finally {
+            if (plain.exists() && !plain.delete()) {
+                throw new IOException("Could not remove temporary decrypted archive");
+            }
         }
     }
 
     public static void populateDirectory() {
         File repo = new File(Environment.getExternalStorageDirectory().getPath() + "/gitrepo/repositories");
         File[] repos = repo.listFiles();
+        if (repos == null) return;
         for (File file : repos) {
             if (file.isDirectory() && file.getPath().contains(".git")) {
                 File directory = new File(file.getPath() + "/branches");
@@ -147,7 +146,7 @@ public class GitrepoBackupAgent extends BackupAgentHelper {
                 byte data[] = new byte[BUFFER];
                 String unmodifiedFilePath = file.getPath();
                 String relativePath = unmodifiedFilePath
-                        .substring(basePathLength);
+                        .substring(basePathLength).replaceFirst("^/+", "");
                 FileInputStream fi = new FileInputStream(unmodifiedFilePath);
                 origin = new BufferedInputStream(fi, BUFFER);
                 ZipEntry entry = new ZipEntry(relativePath);
@@ -195,8 +194,11 @@ public class GitrepoBackupAgent extends BackupAgentHelper {
             ZipEntry ze;
             int count;
             byte[] buffer = new byte[8192];
+            long total = 0;
+            int entries = 0;
             while ((ze = zis.getNextEntry()) != null) {
-                File file = new File(targetDirectory, ze.getName());
+                if (++entries > 100000) throw new IOException("Too many archive entries");
+                File file = SafeZip.resolveEntry(targetDirectory, ze.getName());
                 File dir = ze.isDirectory() ? file : file.getParentFile();
                 if (!dir.isDirectory() && !dir.mkdirs())
                     throw new FileNotFoundException("Failed to ensure directory: " +
@@ -205,8 +207,13 @@ public class GitrepoBackupAgent extends BackupAgentHelper {
                     continue;
                 FileOutputStream fout = new FileOutputStream(file);
                 try {
-                    while ((count = zis.read(buffer)) != -1)
+                    while ((count = zis.read(buffer)) != -1) {
+                        total += count;
+                        if (total > 4L * 1024 * 1024 * 1024) {
+                            throw new IOException("Archive exceeds restore size limit");
+                        }
                         fout.write(buffer, 0, count);
+                    }
                 } finally {
                     fout.close();
                 }
@@ -221,36 +228,4 @@ public class GitrepoBackupAgent extends BackupAgentHelper {
         }
     }
 
-    // Allocate a helper and add it to the backup agent
-    @Override
-    public void onCreate() {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean backup = (pref.getBoolean(PrefsConstants.REPO_BACKUP.getKey(), Boolean.parseBoolean(PrefsConstants.REPO_BACKUP.getDefaultValue())));
-        pref = getSharedPreferences("secret", MODE_PRIVATE);
-        String password = (pref.getString("password", ""));
-        if (backup && !password.isEmpty() && zipFileAtPath(Environment.getExternalStorageDirectory().getPath() + "/gitrepo", getDatabasePath(DB_NAME).getParent() + "/gitrepo.zip")) {
-            try {
-                Crypto.encrypt(password, new File(getDatabasePath(DB_NAME).getParent() + "/gitrepo.zip"), new File(getDatabasePath(DB_NAME).getParent() + "/gitrepo.zip_enc"));
-                new File(getDatabasePath(DB_NAME).getParent() + "/gitrepo.zip").delete();
-            } catch (CryptoException e) {
-                e.printStackTrace();
-            }
-            FileBackupHelper repo = new FileBackupHelper(this, "gitrepo.zip");
-            addHelper("repo", repo);
-        }
-        if (true) {
-            FileBackupHelper dbs = new FileBackupHelper(this, DB_NAME);
-            addHelper("dbs", dbs);
-            SharedPreferencesBackupHelper helper =
-                    new SharedPreferencesBackupHelper(this, PREFS);
-            addHelper(PREFS_BACKUP_KEY, helper);
-        }
-    }
-
-    @Override
-    public File getFilesDir() {
-        File path = getDatabasePath(DB_NAME);
-        return path.getParentFile();
-
-    }
 }

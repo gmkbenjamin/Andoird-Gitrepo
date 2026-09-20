@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.C;
+import io.github.gmkbenjamin.gitrepo.beta.ui.util.BackupPrivacy;
 
 public class GitrepoApplication extends Application {
     public final static long UPDATE_DYNDNS_INTERVAL = 10L * 60L * 1000L;
@@ -27,6 +28,7 @@ public class GitrepoApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        BackupPrivacy.clearLegacyCredentials(this);
         Log.i(TAG, "[App] Started!");
 
         Intent intent = new Intent(C.action.UPDATE_DYNAMIC_DNS_ADDRESS);

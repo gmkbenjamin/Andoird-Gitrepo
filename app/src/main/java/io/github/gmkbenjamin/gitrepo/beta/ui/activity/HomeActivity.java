@@ -139,7 +139,8 @@ public class HomeActivity extends BaseActivity {
 
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String password = getSharedPreferences("secret", MODE_PRIVATE).getString("password", "");
+        // A restore password is supplied only for this operation, never persisted.
+        String password = "";
         final File backup = new File(getDatabasePath("gitrepo.db").getParentFile().getPath() + "/gitrepo.zip_enc");
         if (backup.exists() && password.isEmpty()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
@@ -162,36 +163,7 @@ public class HomeActivity extends BaseActivity {
 
                 }
             });
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    backup.delete();
-                    SharedPreferences pref = getSharedPreferences("secret", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = pref.edit();
-                    editor.putString("password", "");
-                    editor.commit();
-                    dialog.cancel();
-                    AlertDialog alertDialog = new AlertDialog.Builder(HomeActivity.this).create();
-                    alertDialog.setTitle("Are you sure?");
-                    alertDialog.setMessage("You will lose all your backups if you click YES");
-                    alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                    Intent intent = getIntent();
-                                    finish();
-                                    startActivity(intent);
-                                }
-                            });
-                    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                    alertDialog.show();
-                }
-            });
+            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
             builder.setCancelable(false);
             final AlertDialog dialog = builder.create();
             dialog.show();
@@ -400,8 +372,7 @@ public class HomeActivity extends BaseActivity {
                 protected Boolean doInBackground(Void... unused) {
 
                     try {
-                        prefs = getSharedPreferences("secret", MODE_PRIVATE);
-                        return GitrepoBackupAgent.restore(HomeActivity.this, password, prefs, dialog, passwordinput);
+                        return GitrepoBackupAgent.restore(HomeActivity.this, password);
                     } catch (BadPaddingException | IOException e) {
                         Log.e("in catch", "");
                         e.printStackTrace();
@@ -410,7 +381,9 @@ public class HomeActivity extends BaseActivity {
                 }
 
                 protected void onPostExecute(Boolean decrypted) {
-                    if (!decrypted) {
+                    if (decrypted) {
+                        dialog.dismiss();
+                    } else {
                         Toast.makeText(HomeActivity.this, "Please try again", Toast.LENGTH_SHORT).show();
                     }
                     progressDialog.dismiss();
