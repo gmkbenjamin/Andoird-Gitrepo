@@ -29,6 +29,7 @@ import io.github.gmkbenjamin.gitrepo.beta.R;
 import io.github.gmkbenjamin.gitrepo.beta.db.entity.User;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.C;
 import io.github.gmkbenjamin.gitrepo.beta.ui.util.GitrepoCommons;
+import io.github.gmkbenjamin.gitrepo.beta.ui.util.PasswordHashes;
 
 public class AddUserActivity extends BaseActivity {
     public final static int REQUEST_CODE_ADD_USER = 1;
@@ -41,6 +42,8 @@ public class AddUserActivity extends BaseActivity {
     private EditText passwordEditText;
     private EditText publickeyEditText;
     private boolean editMode = false;
+    private boolean passwordHashInFlight = false;
+    private String preparedPasswordHash;
     private int userId;
     private CheckBox activateCheckox;
 
@@ -157,17 +160,13 @@ public class AddUserActivity extends BaseActivity {
         usernameEditText.setText(user.getUsername());
         publickeyEditText.setText(user.getPublickey());
 
-        String password = user.getPassword();
-        if (password != null && password.length() > 16) {
-            passwordEditText.setHint("SHA256: " + password.substring(0, 16) + "...");
-        } else {
-            passwordEditText.setHint("SHA256: " + password);
-        }
+        passwordEditText.setHint("Leave blank to keep the existing password");
         activateCheckox.setChecked(user.isActive());
 
     }
 
     private void processUserAction() {
+        if (passwordHashInFlight) return;
         if (!isFieldsValid(editMode)) {
             return;
         }
@@ -177,6 +176,44 @@ public class AddUserActivity extends BaseActivity {
         String username = usernameEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
         String publickey = publickeyEditText.getText().toString().trim();
+
+        if (password.length() > 4096) {
+            passwordEditText.setError("Password is too long");
+            return;
+        }
+
+        if (!password.isEmpty() && preparedPasswordHash == null) {
+            passwordHashInFlight = true;
+            new Thread(() -> {
+                final String encoded;
+                try {
+                    encoded = PasswordHashes.hash(password);
+                } catch (RuntimeException failure) {
+                    runOnUiThread(() -> {
+                        passwordHashInFlight = false;
+                        if (!isFinishing() && !isDestroyed()) {
+                            Toast.makeText(this, "Could not protect password; no account changes saved.", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    return;
+                }
+                runOnUiThread(() -> {
+                    passwordHashInFlight = false;
+                    if (isFinishing() || isDestroyed()) return;
+                    if (!passwordEditText.getText().toString().trim().equals(password)) {
+                        Toast.makeText(this, "Password changed while saving; tap Save again.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    preparedPasswordHash = encoded;
+                    try {
+                        processUserAction();
+                    } finally {
+                        preparedPasswordHash = null;
+                    }
+                });
+            }, "gitrepo-password-hash").start();
+            return;
+        }
 
         boolean active = activateCheckox.isChecked();
 
@@ -213,7 +250,7 @@ public class AddUserActivity extends BaseActivity {
                 user.setEmail(email);
 
                 if (password != null && !"".equals(password.trim())) {
-                    user.setPassword(GitrepoCommons.generateSha256(password));
+                    user.setPassword(preparedPasswordHash);
                 }
                 if (publickey != null) {
                     user.setPublickey(publickey);
@@ -255,7 +292,7 @@ public class AddUserActivity extends BaseActivity {
             }
 
             try {
-                getHelper().getUserDao().create(new User(0, fullname, email, username, GitrepoCommons.generateSha256(password), publickey, active, System.currentTimeMillis()));
+                getHelper().getUserDao().create(new User(0, fullname, email, username, preparedPasswordHash, publickey, active, System.currentTimeMillis()));
                 new BackupManager(this).dataChanged();
             } catch (SQLException e) {
                 Log.e(TAG, "Problem when add user.", e);

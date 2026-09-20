@@ -37,6 +37,7 @@ import java.sql.SQLException;
 
 import io.github.gmkbenjamin.gitrepo.beta.R;
 import io.github.gmkbenjamin.gitrepo.beta.db.DBHelper;
+import io.github.gmkbenjamin.gitrepo.beta.ui.util.PasswordHashes;
 import io.github.gmkbenjamin.gitrepo.beta.db.entity.User;
 import io.github.gmkbenjamin.gitrepo.beta.ssh.GitrepoCommandFactory;
 import io.github.gmkbenjamin.gitrepo.beta.ssh.GitrepoHostKeyProvider;
@@ -196,18 +197,21 @@ public class SSHDaemonService extends Service implements PasswordAuthenticator, 
                 return false;
             }
 
-            String passwordSha256 = GitrepoCommons.generateSha256(password);
-            Log.i(TAG, "Password SHA256: " + passwordSha256);
-
-            if (passwordSha256.equals(user.getPassword())) {
-                return true;
+            String previous = user.getPassword();
+            if (!PasswordHashes.verify(password, previous)) {
+                return false;
             }
+            if (PasswordHashes.needsUpgrade(previous)) {
+                // Compare-and-set: never overwrite a simultaneous password reset or
+                // reactivate a disabled account while migrating a legacy hash.
+                if (dbHelper.getUserDao().upgradePasswordIfUnchanged(
+                        user.getId(), previous, PasswordHashes.hash(password)) != 1) return false;
+            }
+            return true;
         } catch (SQLException e) {
             Log.e(TAG, "Problem while retrieving user from database.", e);
             return false;
         }
-
-        return false;
     }
 
     @Override

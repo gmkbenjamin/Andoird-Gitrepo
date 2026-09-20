@@ -2,6 +2,7 @@ package io.github.gmkbenjamin.gitrepo.beta.db.dao;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.SelectArg;
+import com.j256.ormlite.stmt.UpdateBuilder;
 
 import java.sql.SQLException;
 import java.util.Iterator;
@@ -16,6 +17,16 @@ public class UserDao extends BaseDao<DBHelper, User, Integer> {
 
     public UserDao(DBHelper dbHelper, Dao<User, Integer> dao) {
         super(dbHelper, dao);
+    }
+
+    /** Atomic legacy-hash migration; does not overwrite a reset or disabled account. */
+    public int upgradePasswordIfUnchanged(int id, String previous, String replacement) throws SQLException {
+        UpdateBuilder<User, Integer> update = dao.updateBuilder();
+        update.updateColumnValue(DBC.users.column_password, replacement);
+        update.where().eq(DBC.users.column_id, id).and()
+                .eq(DBC.users.column_password, new SelectArg(previous)).and()
+                .eq(DBC.users.column_active, true);
+        return update.update();
     }
 
     public User queryForUsername(String username) throws SQLException {
